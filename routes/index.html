@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Chat Rooms</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <style>
+        body > div {
+            padding: 8px 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="content-fluid" id="login">
+    <b>Please enter a username.</b>
+    <form action="" class="needs-validation" novalidate>
+        <div class="form-group row">
+            <label for="username" class="col-sm-2 col-form-label">Username</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="username" required>
+                <div class="invalid-feedback">Please enter a username.</div>
+            </div>
+            <div class="col-sm-10"><button class="btn btn-secondary" type="submit">Enter</button></div>
+        </div>
+    </form>
+    <b id="welcome" style="display: none">Welcome, username</b>
+</div>
+<div class="content-fluid" id="createroom" style="display: none">
+    <form action="" class="needs-validation" novalidate>
+        <b>Create a new room:</b>
+        <div class="form-group row">
+            <label for="newroomname" class="col-sm-2 col-form-label">Room Name</label>
+            <div class="col-sm-10">
+                <input type="text" pattern="[A-Za-z0-9 ]+" class="form-control" id="newroomname" required>
+                <div class="valid-feedback">Looks good!</div>
+                <div class="invalid-feedback">Please provide a room name.</div>
+            </div>
+            <label for="newroomid" class="col-sm-2 col-form-label">Room ID</label>
+            <div class="col-sm-10">
+                <input type="text" pattern="[A-Za-z0-9-]+" class="form-control" id="newroomid" required>
+                <div class="valid-feedback">Looks good!</div>
+                <div class="invalid-feedback">Please provide a valid room ID. A room ID can only contain uppercase and
+                    lowercase letters, as well as digits.</div>
+            </div>
+            <div class="col-sm-10"><button class="btn btn-primary" type="submit">Create room</button></div>
+        </div>
+    </form>
+</div>
+<div class="content-fluid" id="joinroom" style="display: none">
+    <form action="" class="needs-validation" novalidate>
+        <b>Join an existing room:</b>
+        <div class="form-group row">
+            <label for="roomid" class="col-sm-2 col-form-label">Room ID</label>
+            <div class="col-sm-10">
+                <input type="text" pattern="[A-Za-z0-9-]+" class="form-control" id="roomid" required>
+                <div class="invalid-feedback">Invalid room ID. A room ID can only contain uppercase and lowercase
+                    letters, as well as digits.</div>
+            </div>
+            <div class="col-sm-10">
+                <button class="btn btn-secondary" type="submit">Join room</button>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="modal" tabindex="-1" role="dialog" id="roomexists">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Room ID taken!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="roomidtaken">
+                <p></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href =
+                `/${$('#newroomid').val()}-username=${username}`">Join room</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" tabindex="-1" role="dialog" id="roomdne">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>This room doesn't exist!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="noroomhere">
+                <p>&not;&exist;</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+<script>
+    let username = sessionStorage.getItem("username");
+    if (username != null) {
+        document.querySelector('#login form').style.display = "none";
+        document.querySelector('#login b:first-child').style.display = "none";
+        document.querySelector('#login #welcome').style.display = "inline";
+        document.querySelector('#login #welcome').innerHTML = `Welcome, ${username}`;
+        document.querySelector('#createroom').style.display = "block";
+        document.querySelector('#joinroom').style.display = "block";
+    }
+    const socket = io();
+
+    document.querySelector('#login form').onsubmit = () => {
+        if (document.querySelector('#login form').checkValidity() === false) {
+            return false;
+        }
+        username = $('#username').val();
+        sessionStorage.setItem("username", username);
+        document.querySelector('#login form').style.display = "none";
+        document.querySelector('#login b:first-child').style.display = "none";
+        document.querySelector('#login #welcome').style.display = "inline";
+        document.querySelector('#login #welcome').innerHTML = `Welcome, ${username}`;
+        document.querySelector('#createroom').style.display = "block";
+        document.querySelector('#joinroom').style.display = "block";
+        return false;
+    };
+    document.querySelector('#createroom form').onsubmit = () => {
+        if (document.querySelector('#createroom form').checkValidity() === false) {
+            return false;
+        }
+        socket.emit('createroom', {roomid: $('#newroomid').val(), roomname: $('#newroomname').val()});
+        socket.on('roomcreated', () => {
+            window.location.href = `/${$('#newroomid').val()}-username=${username}`;
+        });
+        socket.on('roomexists', () => {
+            $('#roomexists').modal();
+            $('#roomidtaken').text(`The room with ID ${$('#newroomid').val()} already exists!`);
+        });
+        return false;
+    };
+    document.querySelector('#joinroom form').onsubmit  = () => {
+        if (document.querySelector('#joinroom form').checkValidity() === false) {
+            return false;
+        }
+        socket.emit('joinroom', {roomid: $('#roomid').val()});
+        socket.on('roomjoinable', () => {
+            window.location.href = `/${$('#roomid').val()}-username=${username}`;
+        });
+        socket.on('roomdne', () => {
+            $('#roomdne').modal();
+            $('#noroomhere').text(`The room with ID ${$('#roomid').val()} doesn't exist!`);
+        });
+        return false;
+    };
+</script>
+</body>
+</html>

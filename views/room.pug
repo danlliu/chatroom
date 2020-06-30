@@ -1,0 +1,57 @@
+doctype html
+html
+    head
+        meta(charset="utf8")
+        meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
+        style(type='text/css').
+            form { padding: 20px; position: fixed; bottom: 0; width: 100%; padding-right: 50px;}
+            #messages { list-style-type: none; margin: 0; padding: 0; width: 100%;}
+            #messages li { margin: 8px; padding: 8px; }
+        link(href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous" rel="stylesheet")
+    body
+        div(class="content-fluid" id="chat")
+            div(class="content-fluid row justify-content-between" style="margin: auto; padding: 8px; height: 10%;")
+                h3 #{roomName} &lt;#{roomId}&gt;
+                    |
+                    |
+                    |
+                    span(class="badge badge-secondary" id="count").
+                        0 people
+                button(class="btn btn-danger justify-content-end" onclick="$('.modal').modal();").
+                    Leave room
+            div(class="row" style="height: 75%; padding: 0; margin: 0;")
+                ul(id="messages" class="list-group overflow-auto")
+            div(class="row")
+                div(class="col-lg-6")
+                    form(action="")
+                        div(class="input-group")
+                            input(id="m" autocomplete="off" type="text" class="form-control" placeholder="Message" +
+                            "..." aria-label="Message...")
+                            span(class="input-group-btn")
+                                button(class="btn btn-secondary" type="submit").
+                                    Send
+        div(class="modal" tabindex="-1" role="dialog")
+            div(class="modal-dialog" role="document")
+                div(class="modal-content")
+                    div(class="modal-header")
+                        h5(class="modal-title") Leave room?
+                    div(class="modal-body").
+                        Are you sure you want to leave this room?
+                    div(class="modal-footer")
+                        button(type="button" class="btn btn-secondary" data-dismiss="modal") Nah, I'll stay.
+                        button(type="button" onclick="leave()" class="btn btn-danger") Get me out of here!!!
+        script(src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous")
+        script(src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+                integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+                crossorigin="anonymous")
+        script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+                integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+                crossorigin="anonymous")
+        script(src="/socket.io/socket.io.js")
+        script.
+            let username="#{un}";
+            let roomID="#{roomId}";
+        script
+            include room_socket.js

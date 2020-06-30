@@ -1,0 +1,167 @@
+#!/usr/bin/env node
+
+let roomIdToName = {};
+let peopleInRoom = {};
+
+/**
+ * Module dependencies.
+ */
+
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+
+var indexRouter = require('../routes/index');
+
+var app = express();
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.set('view engine', 'pug');
+
+app.use('/', indexRouter);
+
+app.get('/:room-username=:un', (req, res) => {
+  console.log(req.params.room);
+  console.log(roomIdToName);
+  if (roomIdToName[req.params.room] == null) {
+
+  } else {
+    res.render('room.pug', {roomName: roomIdToName[req.params.room], roomId: req.params.room, un: req.params.un});
+  }
+});
+
+var debug = require('debug')('chatrooms:server');
+var http = require('http');
+var socketio = require('socket.io');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+var io = socketio(server);
+
+io.on("connection", (socket) => {
+  console.log("hi");
+  // index.html
+  socket.on('createroom', (data) => {
+    if (roomIdToName[data.roomid] != null) {
+      socket.emit('roomexists');
+      return;
+    }
+    roomIdToName[data.roomid] = data.roomname;
+    peopleInRoom[data.roomid] = 0;
+    socket.emit('roomcreated');
+  });
+
+  socket.on('joinroom', (data) => {
+    if (roomIdToName[data.roomid] == null) {
+      socket.emit('roomdne');
+      return;
+    }
+    socket.emit('roomjoinable');
+  })
+
+  // room_socket.js
+  socket.on('join', (data) => {
+    socket.join(data.room, () => {
+      peopleInRoom[data.room]++;
+      io.to(data.room).emit('user joined', {username: data.username, people: peopleInRoom[data.room]});
+    });
+  });
+
+  socket.on('message', (data) => {
+    io.to(data.room).emit('message', {username: data.username, message: data.message});
+  });
+
+  socket.on('bye', (data) => {
+    console.log("bye");
+    socket.leave(data.room);
+    peopleInRoom[data.room]--;
+    if (peopleInRoom[data.room] != 0) {
+      io.to(data.room).emit('user left', {username: data.username, people: peopleInRoom[data.room]});
+    } else {
+      peopleInRoom[data.room] = null;
+      roomIdToName[data.room] = null;
+    }
+  })
+});
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
