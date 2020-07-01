@@ -75,6 +75,23 @@
         </div>
     </form>
 </div>
+<div class="modal" tabindex="-1" role="dialog" id="notificationrequest">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>This site would like to send you notifications.</h5>
+            </div>
+            <div class="modal-body" id="roomidtaken">
+                <p></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No, thank you.</button>
+                <button type="button" class="btn btn-warning" data-dismiss="modal" onclick="requestnotifications()">Sure
+                    !</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="modal" tabindex="-1" role="dialog" id="roomexists">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -141,6 +158,37 @@
             });
         }, false);
     })();
+</script>
+<script>
+    function requestnotifications() {
+        // Code from https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API
+        function handlePermission(permission) {
+            if(!('permission' in Notification)) {
+                Notification.permission = permission;
+            }
+
+            if(Notification.permission === 'denied' || Notification.permission === 'default') {
+                notificationBtn.style.display = 'block';
+            } else {
+                notificationBtn.style.display = 'none';
+            }
+        }
+
+        if (!('Notification' in window)) {
+            console.log("This browser does not support notifications.");
+        } else {
+            if(checkNotificationPromise()) {
+                Notification.requestPermission()
+                    .then((permission) => {
+                        handlePermission(permission);
+                    })
+            } else {
+                Notification.requestPermission(function(permission) {
+                    handlePermission(permission);
+                });
+            }
+        }
+    }
 </script>
 <script>
     let username = sessionStorage.getItem("username");

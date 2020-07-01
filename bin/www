@@ -120,7 +120,7 @@ io.on("connection", (socket) => {
     socket.leave(data.room);
     room = null;
     peopleInRoom[data.room] = peopleInRoom[data.room].filter((x) => x.id !== data.id);
-    if (peopleInRoom[data.room] != 0) {
+    if (peopleInRoom[data.room].length != 0) {
       io.to(data.room).emit('user left', {id: data.id, username: data.username, people: peopleInRoom[data.room]});
     } else {
       peopleInRoom[data.room] = null;
@@ -134,7 +134,12 @@ io.on("connection", (socket) => {
       return;
     }
     peopleInRoom[room] = peopleInRoom[room].filter((x) => x.id !== userid);
-    io.to(room).emit('user left', {id: userid, username: peopleIDUsername[userid], people: peopleInRoom[room]});
+    if (peopleInRoom[room].length != 0) {
+      io.to(room).emit('user left', {id: userid, username: peopleIDUsername[userid], people: peopleInRoom[room]});
+    } else {
+      peopleInRoom[room] = null;
+      roomIdToName[room] = null;
+    }
     peopleIDUsername[userid] = null;
     room = null;
   });

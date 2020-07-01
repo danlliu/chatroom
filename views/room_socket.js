@@ -24,13 +24,14 @@ socket.on('disconnecting', () => {
 });
 
 socket.on('user joined', (data) => {
+    console.log("user joined");
     $('#count').text(data.people.length === 1 ? "1 person" : `${data.people.length} people`);
     messageUL.append(`<li class="alert alert-success">${data.username} <span class="badge badge-secondary">@${data.id}</span> has entered the chat.</li>`);
     usersUL.text("");
     for (let x of data.people) {
         usersUL.append(`<li class="list-group-item">${x.username} <span class="badge badge-secondary">@${x.id}</span></li>`);
     }
-    document.querySelector('#messages').scrollTo(document.querySelector('#messages').scrollHeight);
+    $('#messages').animate({scrollTop: $('#messages').prop("scrollHeight")}, 250);
 });
 
 socket.on('user left', (data) => {
@@ -40,10 +41,19 @@ socket.on('user left', (data) => {
     for (let x of data.people) {
         usersUL.append(`<li class="list-group-item">${x.username} <span class="badge badge-secondary">@${x.id}</span></li>`);
     }
-    document.querySelector('#messages').scrollTo(document.querySelector('#messages').scrollHeight);
+    $('#messages').animate({scrollTop: $('#messages').prop("scrollHeight")}, 250);
 });
 
 socket.on('message', (data) => {
+    let re = new RegExp(`@${userid}`);
+    if (re.test(data.message)) {
+        var notification = new Notification(`Message from ${data.username} (@${data.id})`, { body: data.message });
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                n.close();
+            }
+        });
+    }
     messageUL.append(`<li><b>${data.username}</b> <span class="badge badge-secondary">@${data.id}</span>: ${data.message}</li>`);
-    document.querySelector('#messages').scrollTo(document.querySelector('#messages').scrollHeight);
+    $('#messages').animate({scrollTop: $('#messages').prop("scrollHeight")}, 250);
 })
