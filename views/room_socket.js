@@ -39,7 +39,7 @@ socket.on('user left', (data) => {
     messageUL.append(`<li class="alert alert-danger">${data.username} <span class="badge badge-secondary">@${data.id}</span> has left the chat.</li>`);
     usersUL.text("");
     for (let x of data.people) {
-        usersUL.append(`<li class="list-group-item">${x.username} <span class="badge badge-secondary">@${x.id}</span></li>`);
+        usersUL.append(`<li class="list-group-item">${x.username} ${data.id === userid ? "&lt;you&gt;" : ""} <span class="badge badge-secondary">@${x.id}</span></li>`);
     }
     $('#messages').animate({scrollTop: $('#messages').prop("scrollHeight")}, 250);
 });
@@ -54,6 +54,7 @@ socket.on('message', (data) => {
             }
         });
     }
-    messageUL.append(`<li><b>${data.username}</b> <span class="badge badge-secondary">@${data.id}</span>: ${data.message}</li>`);
+    data.message = data.message.replace(/@[0-9a-f]+/, `<span class="badge badge-secondary">$&</span>`);
+    messageUL.append(`<li><b>${data.username} ${data.id === userid ? "&lt;you&gt;" : ""}</b> <span class="badge badge-secondary">@${data.id}</span>: ${data.message}</li>`);
     $('#messages').animate({scrollTop: $('#messages').prop("scrollHeight")}, 250);
 })

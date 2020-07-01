@@ -196,7 +196,8 @@
         document.querySelector('#login form').style.display = "none";
         document.querySelector('#login b:first-child').style.display = "none";
         document.querySelector('#login #welcome').style.display = "inline";
-        document.querySelector('#login #welcome').innerHTML = `Welcome, ${username}`;
+        document.querySelector('#login #welcome').innerHTML =
+            `Welcome, ${username} <span class="badge badge-secondary">@${sessionStorage.getItem("userid")}</span>`;
         document.querySelector('#createroom').style.display = "block";
         document.querySelector('#joinroom').style.display = "block";
     }
@@ -211,7 +212,8 @@
         document.querySelector('#login form').style.display = "none";
         document.querySelector('#login b:first-child').style.display = "none";
         document.querySelector('#login #welcome').style.display = "inline";
-        document.querySelector('#login #welcome').innerHTML = `Welcome, ${username}`;
+        document.querySelector('#login #welcome').innerHTML =
+            `Welcome ${username} <span class="badge badge-secondary">@${sessionStorage.getItem("userid")}</span>`;
         document.querySelector('#createroom').style.display = "block";
         document.querySelector('#joinroom').style.display = "block";
         return false;
