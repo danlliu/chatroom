@@ -1,39 +1,47 @@
 const socket = io();
+let userid = sessionStorage.getItem("userid");
 $('form').submit(() => {
     let message = $('#m').val();
-    socket.emit('message', {message, username, room: roomID});
+    socket.emit('message', {id: userid, message, username, room: roomID});
     $('#m').val('');
     return false;
 });
 
 let messageUL = $('#messages');
+let usersUL = $('#users');
 
 function leave() {
-    socket.emit('bye', {room: roomID, username: username});
+    socket.emit('bye', {id: userid, room: roomID, username: username});
     document.location.href = "/";
 }
 
 socket.on('connect', () => {
-    socket.emit('join', {room: roomID, username: username});
+    socket.emit('join', {id: userid, room: roomID, username: username});
 });
 
 socket.on('disconnecting', () => {
-    socket.emit('bye', {room: roomID, username: username});
+    socket.emit('bye', {id: userid, room: roomID, username: username});
 });
 
 socket.on('user joined', (data) => {
-    console.log("user joined");
-    $('#count').text(data.people === 1 ? "1 person" : `${data.people} people`);
-    messageUL.append(`<li class="alert alert-success">${data.username} has entered the chat.</li>`);
+    $('#count').text(data.people.length === 1 ? "1 person" : `${data.people.length} people`);
+    messageUL.append(`<li class="alert alert-success">${data.username} <span class="badge badge-secondary">@${data.id}</span> has entered the chat.</li>`);
+    usersUL.text("");
+    for (let x of data.people) {
+        usersUL.append(`<li class="list-group-item">${x.username} <span class="badge badge-secondary">@${x.id}</span></li>`);
+    }
 });
 
 socket.on('user left', (data) => {
-    console.log("user left");
-    $('#count').text(data.people === 1 ? "1 person" : `${data.people} people`);
-    messageUL.append(`<li class="alert alert-danger">${data.username} has left the chat.</li>`);
+    $('#count').text(data.people.length === 1 ? "1 person" : `${data.people.length} people`);
+    messageUL.append(`<li class="alert alert-danger">${data.username} <span class="badge badge-secondary">@${data.id}</span> has left the chat.</li>`);
+    usersUL.text("");
+    for (let x of data.people) {
+        usersUL.append(`<li class="list-group-item">${x.username} <span class="badge badge-secondary">@${x.id}</span></li>`);
+    }
 });
 
 socket.on('message', (data) => {
-    console.log("message");
-    messageUL.append(`<li><b>${data.username}:</b> ${data.message}</li>`);
+    messageUL.append(`<li><b>${data.username}</b> <span class="badge badge-secondary">@${data.id}</span>: ${data.message}</li>`);
+    messageUL.scrollTo(messageUL.scrollHeight);
 })

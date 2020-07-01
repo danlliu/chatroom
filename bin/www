@@ -2,6 +2,7 @@
 
 let roomIdToName = {};
 let peopleInRoom = {};
+let peopleIDUsername = {};
 
 /**
  * Module dependencies.
@@ -24,13 +25,13 @@ app.set('view engine', 'pug');
 
 app.use('/', indexRouter);
 
-app.get('/:room-username=:un', (req, res) => {
+app.get('/:room', (req, res) => {
   console.log(req.params.room);
   console.log(roomIdToName);
   if (roomIdToName[req.params.room] == null) {
 
   } else {
-    res.render('room.pug', {roomName: roomIdToName[req.params.room], roomId: req.params.room, un: req.params.un});
+    res.render('room.pug', {roomName: roomIdToName[req.params.room], roomId: req.params.room});
   }
 });
 
@@ -52,8 +53,35 @@ app.set('port', port);
 var server = http.createServer(app);
 var io = socketio(server);
 
+var crypto = require('crypto');
+
+function generateUserID() {
+  let userid;
+  do {
+    userid = crypto.randomBytes(2).toString("hex");
+  } while (peopleIDUsername[userid] != null);
+
+  //let randomCharacter = '1' // Chosen by random number generator, guaranteed to be random.
+  return userid;
+}
+
 io.on("connection", (socket) => {
-  console.log("hi");
+
+  let userid;
+  let room = null;
+  let currentpage = 0;
+  // 0 = index
+  // 1 = room
+
+  socket.on('need user id', () => {
+    socket.emit('user id', generateUserID());
+  });
+
+  socket.on('register', (data) => {
+    peopleIDUsername[data.id] = data.username;
+    userid = data.id;
+    console.log("User id is now", userid);
+  });
   // index.html
   socket.on('createroom', (data) => {
     if (roomIdToName[data.roomid] != null) {
@@ -61,7 +89,7 @@ io.on("connection", (socket) => {
       return;
     }
     roomIdToName[data.roomid] = data.roomname;
-    peopleInRoom[data.roomid] = 0;
+    peopleInRoom[data.roomid] = Array(0);
     socket.emit('roomcreated');
   });
 
@@ -75,27 +103,41 @@ io.on("connection", (socket) => {
 
   // room_socket.js
   socket.on('join', (data) => {
+    currentpage = 1;
+    userid = data.id;
     socket.join(data.room, () => {
-      peopleInRoom[data.room]++;
-      io.to(data.room).emit('user joined', {username: data.username, people: peopleInRoom[data.room]});
+      room = data.room;
+      peopleInRoom[data.room].push({id: data.id, username: data.username});
+      io.to(data.room).emit('user joined', {id: data.id, username: data.username, people: peopleInRoom[data.room]});
     });
   });
 
   socket.on('message', (data) => {
-    io.to(data.room).emit('message', {username: data.username, message: data.message});
+    io.to(data.room).emit('message', {id: data.id, username: data.username, message: data.message});
   });
 
   socket.on('bye', (data) => {
-    console.log("bye");
     socket.leave(data.room);
-    peopleInRoom[data.room]--;
+    room = null;
+    peopleInRoom[data.room] = peopleInRoom[data.room].filter((x) => x.id !== data.id);
     if (peopleInRoom[data.room] != 0) {
-      io.to(data.room).emit('user left', {username: data.username, people: peopleInRoom[data.room]});
+      io.to(data.room).emit('user left', {id: data.id, username: data.username, people: peopleInRoom[data.room]});
     } else {
       peopleInRoom[data.room] = null;
       roomIdToName[data.room] = null;
     }
-  })
+    currentpage = 0;
+  });
+
+  socket.on('disconnecting', () => {
+    if (currentpage === 0) {
+      return;
+    }
+    peopleInRoom[room] = peopleInRoom[room].filter((x) => x.id !== userid);
+    io.to(room).emit('user left', {id: userid, username: peopleIDUsername[userid], people: peopleInRoom[room]});
+    peopleIDUsername[userid] = null;
+    room = null;
+  });
 });
 
 /**

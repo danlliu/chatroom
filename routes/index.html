@@ -11,6 +11,17 @@
             padding: 8px 20px;
         }
     </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        if (sessionStorage.getItem("userid") == null) {
+            socket.emit('need user id');
+            socket.on('user id', (userid) => {
+                sessionStorage.setItem("userid", userid);
+            });
+        }
+    </script>
 </head>
 <body>
 <div class="content-fluid" id="login">
@@ -78,7 +89,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="window.location.href =
-                `/${$('#newroomid').val()}-username=${username}`">Join room</button>
+                `/${$('#newroomid').val()}`">Join room</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -111,7 +122,6 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
         integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
         crossorigin="anonymous"></script>
-<script src="/socket.io/socket.io.js"></script>
 <script>
     // Example starter JavaScript for disabling form submissions if there are invalid fields
     (function() {
@@ -142,13 +152,13 @@
         document.querySelector('#createroom').style.display = "block";
         document.querySelector('#joinroom').style.display = "block";
     }
-    const socket = io();
 
     document.querySelector('#login form').onsubmit = () => {
         if (document.querySelector('#login form').checkValidity() === false) {
             return false;
         }
         username = $('#username').val();
+        socket.emit('register', {username: username, id: sessionStorage.getItem("userid")});
         sessionStorage.setItem("username", username);
         document.querySelector('#login form').style.display = "none";
         document.querySelector('#login b:first-child').style.display = "none";
@@ -164,7 +174,7 @@
         }
         socket.emit('createroom', {roomid: $('#newroomid').val(), roomname: $('#newroomname').val()});
         socket.on('roomcreated', () => {
-            window.location.href = `/${$('#newroomid').val()}-username=${username}`;
+            window.location.href = `/${$('#newroomid').val()}`;
         });
         socket.on('roomexists', () => {
             $('#roomexists').modal();
@@ -178,7 +188,7 @@
         }
         socket.emit('joinroom', {roomid: $('#roomid').val()});
         socket.on('roomjoinable', () => {
-            window.location.href = `/${$('#roomid').val()}-username=${username}`;
+            window.location.href = `/${$('#roomid').val()}`;
         });
         socket.on('roomdne', () => {
             $('#roomdne').modal();

@@ -7,10 +7,12 @@ html
             form { padding: 20px; position: fixed; bottom: 0; width: 100%; padding-right: 50px;}
             #messages { list-style-type: none; margin: 0; padding: 0; width: 100%;}
             #messages li { margin: 8px; padding: 8px; }
+            #users { list-style-type: none; margin: 0; padding: 0; width: 100%;}
         link(href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous" rel="stylesheet")
     body
         div(class="content-fluid" id="chat")
-            div(class="content-fluid row justify-content-between" style="margin: auto; padding: 8px; height: 10%;")
+            div(class="content-fluid row justify-content-between" style="position: fixed; width: 100%; top: 0; " +
+            "margin: auto; padding: 8px; height: 10%;")
                 h3 #{roomName} &lt;#{roomId}&gt;
                     |
                     |
@@ -19,8 +21,12 @@ html
                         0 people
                 button(class="btn btn-danger justify-content-end" onclick="$('.modal').modal();").
                     Leave room
-            div(class="row" style="height: 75%; padding: 0; margin: 0;")
-                ul(id="messages" class="list-group overflow-auto")
+            div(class="row" style="position: fixed; top: 60px; width: 100%; height: 80%; padding: 0; margin: 0;")
+                div(class="col-2" style="max-height: 100%;")
+                    h5 Users in chat:
+                    ul(id="users" class="list-group overflow-auto" style="max-height: 100%;")
+                div(class="col-10" style="max-height: 100%;")
+                    ul(id="messages" class="list-group" style="max-height: 100%; overflow: auto;")
             div(class="row")
                 div(class="col-lg-6")
                     form(action="")
@@ -51,7 +57,7 @@ html
                 crossorigin="anonymous")
         script(src="/socket.io/socket.io.js")
         script.
-            let username="#{un}";
+            let username=sessionStorage.getItem("username");
             let roomID="#{roomId}";
         script
             include room_socket.js
