@@ -30,6 +30,7 @@ socket.on('user joined', (data) => {
     for (let x of data.people) {
         usersUL.append(`<li class="list-group-item">${x.username} <span class="badge badge-secondary">@${x.id}</span></li>`);
     }
+    document.querySelector('#messages').scrollTo(document.querySelector('#messages').scrollHeight);
 });
 
 socket.on('user left', (data) => {
@@ -39,9 +40,10 @@ socket.on('user left', (data) => {
     for (let x of data.people) {
         usersUL.append(`<li class="list-group-item">${x.username} <span class="badge badge-secondary">@${x.id}</span></li>`);
     }
+    document.querySelector('#messages').scrollTo(document.querySelector('#messages').scrollHeight);
 });
 
 socket.on('message', (data) => {
     messageUL.append(`<li><b>${data.username}</b> <span class="badge badge-secondary">@${data.id}</span>: ${data.message}</li>`);
-    messageUL.scrollTo(messageUL.scrollHeight);
+    document.querySelector('#messages').scrollTo(document.querySelector('#messages').scrollHeight);
 })
