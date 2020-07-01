@@ -15,6 +15,10 @@ function leave() {
     document.location.href = "/";
 }
 
+function leavemodal() {
+    $('.modal').modal();
+}
+
 socket.on('connect', () => {
     socket.emit('join', {id: userid, room: roomID, username: username});
 });
