@@ -1,5 +1,8 @@
 const socket = io();
 let userid = sessionStorage.getItem("userid");
+if (userid == null) {
+    window.location.href = "/";
+}
 $('form').submit(() => {
     let message = $('#m').val();
     socket.emit('message', {id: userid, message, username, room: roomID});
@@ -33,7 +36,7 @@ socket.on('user joined', (data) => {
     messageUL.append(`<li class="alert alert-success">${data.username} <span class="badge badge-secondary">@${data.id}</span> has entered the chat.</li>`);
     usersUL.text("");
     for (let x of data.people) {
-        usersUL.append(`<li class="list-group-item">${x.username} <span class="badge badge-secondary">@${x.id}</span></li>`);
+        usersUL.append(`<li class="list-group-item">${x.username} ${data.id === userid ? "&lt;me&gt;" : ""} <span class="badge badge-secondary">@${x.id}</span></li>`);
     }
     $('#messages').animate({scrollTop: $('#messages').prop("scrollHeight")}, 250);
 });
@@ -43,7 +46,7 @@ socket.on('user left', (data) => {
     messageUL.append(`<li class="alert alert-danger">${data.username} <span class="badge badge-secondary">@${data.id}</span> has left the chat.</li>`);
     usersUL.text("");
     for (let x of data.people) {
-        usersUL.append(`<li class="list-group-item">${x.username} ${data.id === userid ? "&lt;you&gt;" : ""} <span class="badge badge-secondary">@${x.id}</span></li>`);
+        usersUL.append(`<li class="list-group-item">${x.username} ${data.id === userid ? "&lt;me&gt;" : ""} <span class="badge badge-secondary">@${x.id}</span></li>`);
     }
     $('#messages').animate({scrollTop: $('#messages').prop("scrollHeight")}, 250);
 });
@@ -59,6 +62,6 @@ socket.on('message', (data) => {
         });
     }
     data.message = data.message.replace(/@[0-9a-f]+/, `<span class="badge badge-secondary">$&</span>`);
-    messageUL.append(`<li><b>${data.username} ${data.id === userid ? "&lt;you&gt;" : ""}</b> <span class="badge badge-secondary">@${data.id}</span>: ${data.message}</li>`);
+    messageUL.append(`<li><b>${data.username} ${data.id === userid ? "&lt;me&gt;" : ""}</b> <span class="badge badge-secondary">@${data.id}</span>: ${data.message}</li>`);
     $('#messages').animate({scrollTop: $('#messages').prop("scrollHeight")}, 250);
 })
