@@ -29,7 +29,7 @@ app.get('/:room', (req, res) => {
   console.log(req.params.room);
   console.log(roomIdToName);
   if (roomIdToName[req.params.room] == null) {
-
+    res.render('noroom.pug', {roomId: req.params.room});
   } else {
     res.render('room.pug', {roomName: roomIdToName[req.params.room], roomId: req.params.room});
   }

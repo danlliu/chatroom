@@ -54,12 +54,14 @@ socket.on('user left', (data) => {
 socket.on('message', (data) => {
     let re = new RegExp(`@${userid}`);
     if (re.test(data.message)) {
-        var notification = new Notification(`Message from ${data.username} (@${data.id})`, { body: data.message });
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'visible') {
-                n.close();
-            }
-        });
+        if (localStorage.getItem("notifyonmention") === "yes") {
+            var notification = new Notification(`Message from ${data.username} (@${data.id})`, { body: data.message });
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') {
+                    notification.close();
+                }
+            });
+        }
     }
     data.message = data.message.replace(/@[0-9a-f]+/, `<span class="badge badge-secondary">$&</span>`);
     messageUL.append(`<li><b>${data.username} ${data.id === userid ? "&lt;me&gt;" : ""}</b> <span class="badge badge-secondary">@${data.id}</span>: ${data.message}</li>`);
