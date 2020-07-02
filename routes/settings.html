@@ -8,6 +8,21 @@
           integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 </head>
 <body>
+    <form>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="notifications" onchange="update()">
+            <label class="form-check-label" for="notifications">Enable notifications</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="notifymention" disabled>
+            <label class="form-check-label" for="notifymention">Notify when someone mentions me.</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="notifydm" disabled>
+            <label class="form-check-label" for="notifydm">Notify when someone sends me a private message.</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Update settings</button>
+    </form>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
         crossorigin="anonymous"></script>
@@ -17,5 +32,45 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
         integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
         crossorigin="anonymous"></script>
+<script>
+
+    let mention = localStorage.getItem("notifyonmention") === "yes";
+    let dm = localStorage.getItem("notifyondm") === "yes";
+
+    if (mention || dm) {
+        $('#notifications').prop("checked", true);
+        $('#notifymention').prop("disabled", false);
+        $('#notifymention').prop("checked", mention);
+        $('#notifydm').prop("disabled", false);
+        $('#notifydm').prop("checked", mention);
+    } else {
+        $('#notifications').prop("checked", false);
+        $('#notifymention').prop("disabled", true);
+        $('#notifydm').prop("disabled", true);
+    }
+
+    function update() {
+        if ($('#notifications').prop("checked") === true) {
+            $('#notifymention').prop("disabled", false);
+            $('#notifydm').prop("disabled", false);
+        } else {
+            $('#notifymention').prop("disabled", true);
+            $('#notifydm').prop("disabled", true);
+        }
+    }
+    $('form').submit(() => {
+        if ($('#notifications').prop("checked") === true) {
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+            localStorage.setItem("notifyonmention", $('#notifymention').prop("checked") ? "yes" : "no");
+            localStorage.setItem("notifyondm", $('#notifydm').prop("checked") ? "yes" : "no");
+        } else {
+            localStorage.setItem("notifyonmention", "no");
+            localStorage.setItem("notifyondm", "no");
+        }
+        return false;
+    });
+</script>
 </body>
 </html>

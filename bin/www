@@ -14,6 +14,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('../routes/index');
+var settingsRouter = require('../routes/settings');
 
 var app = express();
 
@@ -24,6 +25,7 @@ app.use(cookieParser());
 app.set('view engine', 'pug');
 
 app.use('/', indexRouter);
+app.use('/usr/settings', settingsRouter);
 
 app.get('/:room', (req, res) => {
   console.log(req.params.room);
