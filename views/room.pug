@@ -59,7 +59,7 @@ html
                 crossorigin="anonymous")
         script(src="/socket.io/socket.io.js")
         script.
-            let username=sessionStorage.getItem("username");
+            let username=localStorage.getItem("username");
             let roomID="#{roomId}";
         script
             include room_socket.js

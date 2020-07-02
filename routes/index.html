@@ -15,10 +15,10 @@
     <script>
         const socket = io();
 
-        if (sessionStorage.getItem("userid") == null) {
+        if (localStorage.getItem("userid") == null) {
             socket.emit('need user id');
             socket.on('user id', (userid) => {
-                sessionStorage.setItem("userid", userid);
+                localStorage.setItem("userid", userid);
             });
         }
     </script>
@@ -191,13 +191,13 @@
     }
 </script>
 <script>
-    let username = sessionStorage.getItem("username");
+    let username = localStorage.getItem("username");
     if (username != null) {
         document.querySelector('#login form').style.display = "none";
         document.querySelector('#login b:first-child').style.display = "none";
         document.querySelector('#login #welcome').style.display = "inline";
         document.querySelector('#login #welcome').innerHTML =
-            `Welcome, ${username} <span class="badge badge-secondary">@${sessionStorage.getItem("userid")}</span>`;
+            `Welcome, ${username} <span class="badge badge-secondary">@${localStorage.getItem("userid")}</span>`;
         document.querySelector('#createroom').style.display = "block";
         document.querySelector('#joinroom').style.display = "block";
     }
@@ -207,13 +207,13 @@
             return false;
         }
         username = $('#username').val();
-        socket.emit('register', {username: username, id: sessionStorage.getItem("userid")});
-        sessionStorage.setItem("username", username);
+        socket.emit('register', {username: username, id: localStorage.getItem("userid")});
+        localStorage.setItem("username", username);
         document.querySelector('#login form').style.display = "none";
         document.querySelector('#login b:first-child').style.display = "none";
         document.querySelector('#login #welcome').style.display = "inline";
         document.querySelector('#login #welcome').innerHTML =
-            `Welcome ${username} <span class="badge badge-secondary">@${sessionStorage.getItem("userid")}</span>`;
+            `Welcome ${username} <span class="badge badge-secondary">@${localStorage.getItem("userid")}</span>`;
         document.querySelector('#createroom').style.display = "block";
         document.querySelector('#joinroom').style.display = "block";
         return false;

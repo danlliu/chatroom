@@ -1,5 +1,5 @@
 const socket = io();
-let userid = sessionStorage.getItem("userid");
+let userid = localStorage.getItem("userid");
 if (userid == null) {
     window.location.href = "/";
 }
