@@ -13,13 +13,17 @@ $('form').submit(() => {
 let messageUL = $('#messages');
 let usersUL = $('#users');
 
+function settingsmodal() {
+    $('#settingsmodal').modal();
+}
+
 function leave() {
     socket.emit('bye', {id: userid, room: roomID, username: username});
     document.location.href = "/";
 }
 
 function leavemodal() {
-    $('.modal').modal();
+    $('#leavecheck').modal();
 }
 
 socket.on('connect', () => {

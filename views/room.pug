@@ -19,8 +19,9 @@ html
                     |
                     span(class="badge badge-secondary" id="count").
                         0 people
-                button(class="btn btn-danger justify-content-end" style="height: 50px;"
-                    onclick="leavemodal()").
+                button(class="btn btn-secondary" style="height: 50px;" onclick="settingsmodal").
+                    Settings &#9881;
+                button(class="btn btn-danger justify-content-end" style="height: 50px;" onclick="leavemodal()").
                     Leave room
             div(class="row" style="position: fixed; top: 60px; width: 100%; height: 80%; padding: 0; margin: 0;")
                 div(class="col-2" style="max-height: 100%;")
@@ -47,6 +48,14 @@ html
                     div(class="modal-footer")
                         button(type="button" class="btn btn-secondary" data-dismiss="modal") Nah, I'll stay.
                         button(type="button" onclick="leave()" class="btn btn-danger") Get me out of here!!!
+        div(class="modal" tabindex="-1" role="dialog" id="settingsmodal")
+            div(class="modal-dialog" role="document")
+                div(class="modal-content")
+                    div(class="modal-header")
+                        h5(class="modal-title") Site Settings
+                        button(type="button" class="close" data-dismiss="modal" aria-label="Close") &times;
+                    div(class="modal-body")
+                        iframe(src="/usr/settings" title="Settings" style="width: 100%; height: 100%")
         script(src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
             integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
             crossorigin="anonymous")
