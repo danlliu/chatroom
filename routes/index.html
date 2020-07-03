@@ -76,6 +76,7 @@
     </form>
 </div>
 <div class="settings" id="sitesettings" style="display: none">
+    <button class="btn btn-danger" onclick="logout()">Log out</button>
     <button class="btn btn-secondary" onclick="opensettings()">Settings &#9881;</button>
 </div>
 <div class="modal" tabindex="-1" role="dialog" id="notificationrequest">
@@ -267,6 +268,12 @@
 
     function opensettings() {
         $('#settings').modal();
+    }
+
+    function logout() {
+        socket.emit('logout', localStorage.getItem("userid"));
+        localStorage.clear();
+        window.location.href='/';
     }
 </script>
 </body>

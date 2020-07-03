@@ -75,6 +75,8 @@ io.on("connection", (socket) => {
   let userid;
   let room = null;
   let currentpage = 0;
+
+  let dms = {};
   // 0 = index
   // 1 = room
 
@@ -84,9 +86,16 @@ io.on("connection", (socket) => {
 
   socket.on('register', (data) => {
     peopleIDUsername[data.id] = data.username;
+    peopleIDSocket[data.id] = socket;
     userid = data.id;
     console.log("User id is now", userid);
   });
+
+  socket.on('logout', (id) => {
+    peopleIDUsername[id] = null;
+    peopleIDSocket[id] = null;
+  });
+
   // index.html
   socket.on('createroom', (data) => {
     if (roomIdToName[data.roomid] != null) {
